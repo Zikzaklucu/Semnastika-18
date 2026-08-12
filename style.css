@@ -1173,53 +1173,13 @@ em {
 }
 
 .section--approach {
-  min-height: 1880px;
+  min-height: 0;
   padding-block: 90px 100px;
   overflow: hidden;
 }
 
 .approach-inner {
   width: min(100%, 1440px);
-}
-
-.approach-scene {
-  position: relative;
-  width: min(100% - 48px, 980px);
-  height: 340px;
-  margin-inline: auto;
-}
-
-.approach-scene--top {
-  margin-block-start: 58px;
-}
-
-.professor-crop {
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-end: 25px;
-  width: 210px;
-  height: 190px;
-  overflow: hidden;
-}
-
-.professor-crop img {
-  width: 205px;
-  max-width: none;
-  transform: translateY(-6px);
-}
-
-.trail-line {
-  position: absolute;
-  inset-inline-start: 50%;
-  width: 0;
-  height: 315px;
-  border-inline-start: 7px dashed var(--gold);
-  transform: translateX(-50%);
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
-}
-
-.approach-scene--top .trail-line {
-  inset-block-start: 90px;
 }
 
 .card-track-wrap {
@@ -1412,23 +1372,6 @@ em {
 
 .carousel-button--next {
   inset-inline-end: var(--carousel-control-inset);
-}
-
-.approach-scene--bottom {
-  height: 430px;
-}
-
-.approach-scene--bottom .trail-line {
-  inset-block-start: 0;
-  height: 280px;
-}
-
-.buma {
-  position: absolute;
-  inset-inline-end: 55px;
-  inset-block-start: 120px;
-  width: 190px;
-  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.55));
 }
 
 .section--case {
@@ -2615,7 +2558,7 @@ em {
   }
 
   .section--approach {
-    min-height: 1700px;
+    min-height: 0;
   }
 
   .card-track-wrap {
@@ -2948,28 +2891,6 @@ em {
     padding-block: 70px;
   }
 
-  .approach-scene {
-    height: 250px;
-  }
-
-  .professor-crop {
-    width: 150px;
-    height: 160px;
-  }
-
-  .professor-crop img {
-    width: 145px;
-    transform: translateY(-4px);
-  }
-
-  .trail-line {
-    height: 230px;
-    border-inline-start-width: 4px;
-  }
-
-  .approach-scene--top .trail-line {
-    inset-block-start: 55px;
-  }
 
   .concept-card {
     height: clamp(320px, 58svh, 430px);
@@ -3006,14 +2927,6 @@ em {
     inset-inline-end: var(--carousel-control-inset);
   }
 
-  .approach-scene--bottom {
-    height: 330px;
-  }
-
-  .buma {
-    inset-inline-end: 8px;
-    width: 125px;
-  }
 
   .section--case {
     padding-block: 55px 90px;
