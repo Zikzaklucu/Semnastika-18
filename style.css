@@ -883,35 +883,11 @@ em {
 .linimasa {
   position: relative;
   padding: 72px 24px 96px;
-  background: radial-gradient(circle at 25% 15%, var(--green-dark), var(--green-black) 70%);
   overflow: hidden;
 }
 
-.linimasa::before {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    45deg,
-    color-mix(in srgb, var(--gold) 3.5%, transparent) 0,
-    color-mix(in srgb, var(--gold) 3.5%, transparent) 1px,
-    transparent 1px,
-    transparent 36px
-  );
-  pointer-events: none;
-  content: "";
-}
-
 .linimasa-title {
-  position: relative;
   margin: 0 0 64px;
-  color: var(--gold);
-  font-family: "Naluka", "Rumble Brave", serif;
-  font-size: clamp(2.25rem, 8vw, 4.25rem);
-  font-weight: var(--weight-heading);
-  letter-spacing: 0.1em;
-  line-height: 1.05;
-  text-align: center;
-  text-transform: uppercase;
 }
 
 .linimasa-track {
