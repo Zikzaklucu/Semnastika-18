@@ -742,22 +742,37 @@ body:has(.semnastika-embed) > .row.tpb-row > .tpb-html > .row > .widget-html {
   -webkit-user-drag: none;
 }
 
-.semnastika-embed .portrait-photo--contain {
-  inset-inline-start: 18.7%;
-  inset-block-start: 24%;
-  width: 66%;
-  height: 62%;
-  object-fit: contain;
-  object-position: center bottom;
+.semnastika-embed .portrait-photo-window {
+  position: absolute;
+  inset-inline-start: 19%;
+  inset-block-start: 13.3%;
+  z-index: 1;
+  display: block;
+  width: 64.2%;
+  height: 71.5%;
+  overflow: hidden;
+  background: #e0e0e0;
 }
 
-.semnastika-embed .portrait-photo--wide {
-  inset-inline-start: 11.4%;
-  inset-block-start: 7.2%;
-  width: 85.2%;
-  height: 78.9%;
+.semnastika-embed .portrait-photo-window > .portrait-photo {
+  inset-inline-start: var(--portrait-left);
+  inset-block-start: var(--portrait-top);
+  width: var(--portrait-width);
+  max-width: none;
+  height: auto;
   object-fit: contain;
-  object-position: center bottom;
+}
+
+.semnastika-embed .portrait-photo--solikhatun-v1 {
+  --portrait-left: -5.6%;
+  --portrait-top: 3.9%;
+  --portrait-width: 115.8%;
+}
+
+.semnastika-embed .portrait-photo--imanuel-v1 {
+  --portrait-left: -19.8%;
+  --portrait-top: -15%;
+  --portrait-width: 131.9%;
 }
 
 .semnastika-embed .portrait-frame-art {
