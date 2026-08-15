@@ -38,10 +38,29 @@
 
     <main id="main-content">
       <section class="hero" id="home" aria-labelledby="hero-title">
+        <div class="hero__photos" id="hero-photos" aria-hidden="true">
+          <img class="hero__photo is-active" src="https://cdn.jsdelivr.net/gh/Zikzaklucu/Semnastika-18@main/assets/hero-photo.png" alt="" width="4093" height="1964" fetchpriority="high" decoding="async" data-hero-photo data-photo-label="Panel pembicara Semnastika">
+          <img class="hero__photo" src="https://cdn.jsdelivr.net/gh/Zikzaklucu/Semnastika-18@main/assets/hero-photo-02-dsc02367.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Pembicara berdiskusi bersama peserta">
+          <img class="hero__photo" src="https://cdn.jsdelivr.net/gh/Zikzaklucu/Semnastika-18@main/assets/hero-photo-03-dsc02203.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Pembicara memaparkan analisis data">
+          <img class="hero__photo" src="https://cdn.jsdelivr.net/gh/Zikzaklucu/Semnastika-18@main/assets/hero-photo-04-dsc02261.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Sesi diskusi panel Semnastika">
+        </div>
         <div class="hero__shade"></div>
-        <div class="hero__content">
-          <h1 id="hero-title">Semnastika 18</h1>
-          <p>“Strategi Optimalisasi Investasi Menggunakan Pendekatan Matematika dan <em>Data Analytics</em>”</p>
+
+        <div class="hero__carousel" role="region" aria-roledescription="carousel" aria-label="Galeri foto Semnastika 18" data-hero-carousel>
+          <div class="hero__content">
+            <h1 id="hero-title">Semnastika 18</h1>
+            <p class="hero__theme">“Strategi Optimalisasi Investasi Menggunakan Pendekatan Matematika dan <em>Data Analytics</em>”</p>
+          </div>
+
+          <div class="hero__controls">
+            <div class="hero__pager" role="group" aria-label="Pilih foto Semnastika">
+              <button class="is-active" type="button" aria-label="Tampilkan foto panel pembicara" aria-controls="hero-photos" aria-current="true" data-hero-dot></button>
+              <button type="button" aria-label="Tampilkan foto pembicara bersama peserta" aria-controls="hero-photos" data-hero-dot></button>
+              <button type="button" aria-label="Tampilkan foto pemaparan analisis data" aria-controls="hero-photos" data-hero-dot></button>
+              <button type="button" aria-label="Tampilkan foto sesi diskusi panel" aria-controls="hero-photos" data-hero-dot></button>
+            </div>
+          </div>
+          <p class="sr-only" aria-live="polite" aria-atomic="true" data-hero-status>Foto 1 dari 4: Panel pembicara Semnastika</p>
         </div>
       </section>
 
@@ -551,6 +570,9 @@
         const minimumDistance = options.minimumDistance ?? 56;
         const maximumDuration = options.maximumDuration ?? 650;
         const axisBias = options.axisBias ?? 1.25;
+        const listenerOptions = options.signal
+          ? { passive: true, signal: options.signal }
+          : { passive: true };
         let touchId = null;
         let startX = 0;
         let startY = 0;
@@ -579,7 +601,7 @@
           lastY = startY;
           startTime = performance.now();
           startContext = options.captureStart?.(event) ?? null;
-        }, { passive: true });
+        }, listenerOptions);
 
         surface.addEventListener("touchmove", (event) => {
           if (touchId === null) return;
@@ -587,7 +609,7 @@
           if (!touch) return;
           lastX = touch.clientX;
           lastY = touch.clientY;
-        }, { passive: true });
+        }, listenerOptions);
 
         surface.addEventListener("touchend", (event) => {
           if (touchId === null) return;
@@ -606,10 +628,153 @@
           if (Math.abs(deltaX) <= Math.abs(deltaY) * axisBias) return;
           if (options.shouldSwipe && !options.shouldSwipe({ deltaX, deltaY, duration, startContext: gestureContext })) return;
           onSwipe(deltaX < 0 ? 1 : -1);
-        }, { passive: true });
+        }, listenerOptions);
 
-        surface.addEventListener("touchcancel", reset, { passive: true });
+        surface.addEventListener("touchcancel", reset, listenerOptions);
       };
+
+      const HERO_AUTOPLAY_INTERVAL = 5000;
+      const heroCarousel = embedRoot.querySelector("[data-hero-carousel]");
+      if (heroCarousel) {
+        const hero = heroCarousel.closest(".hero");
+        const photos = Array.from(hero?.querySelectorAll("[data-hero-photo]") || []);
+        const dots = Array.from(heroCarousel.querySelectorAll("[data-hero-dot]"));
+        const pager = heroCarousel.querySelector(".hero__pager");
+        const status = heroCarousel.querySelector("[data-hero-status]");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let activeIndex = 0;
+        let autoplayTimer = 0;
+        let isHovering = false;
+        let isFocusedWithin = false;
+        let isTouching = false;
+
+        heroCarousel.__autoplayCleanup?.();
+        const autoplayEvents = new AbortController();
+        const autoplayListenerOptions = { signal: autoplayEvents.signal };
+        const autoplayTouchListenerOptions = { passive: true, signal: autoplayEvents.signal };
+
+        const stopAutoplayTimer = () => {
+          if (!autoplayTimer) return;
+          window.clearInterval(autoplayTimer);
+          autoplayTimer = 0;
+        };
+
+        const updateState = () => {
+          photos.forEach((photo, index) => {
+            photo.classList.toggle("is-active", index === activeIndex);
+          });
+          syncDotState(dots, activeIndex);
+
+          if (status && photos[activeIndex]) {
+            const label = photos[activeIndex].dataset.photoLabel || "Foto Semnastika";
+            status.textContent = `Foto ${activeIndex + 1} dari ${photos.length}: ${label}`;
+          }
+        };
+
+        const moveTo = (index) => {
+          if (photos.length < 2) return;
+          const nextIndex = (index + photos.length) % photos.length;
+          if (nextIndex === activeIndex) return;
+          activeIndex = nextIndex;
+          updateState();
+        };
+
+        const restartAutoplayTimer = () => {
+          stopAutoplayTimer();
+          if (
+            reducedMotion.matches
+            || document.hidden
+            || isHovering
+            || isFocusedWithin
+            || isTouching
+            || photos.length < 2
+          ) return;
+
+          autoplayTimer = window.setInterval(() => {
+            moveTo(activeIndex + 1);
+          }, HERO_AUTOPLAY_INTERVAL);
+        };
+
+        heroCarousel.__autoplayCleanup = () => {
+          stopAutoplayTimer();
+          autoplayEvents.abort();
+        };
+
+        dots.forEach((dot, index) => {
+          dot.addEventListener("click", () => {
+            moveTo(index);
+            restartAutoplayTimer();
+          }, autoplayListenerOptions);
+        });
+
+        heroCarousel.addEventListener("pointerenter", (event) => {
+          if (event.pointerType !== "mouse") return;
+          isHovering = true;
+          stopAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        heroCarousel.addEventListener("pointerleave", (event) => {
+          if (event.pointerType !== "mouse") return;
+          isHovering = false;
+          restartAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        heroCarousel.addEventListener("focusin", () => {
+          isFocusedWithin = true;
+          stopAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        heroCarousel.addEventListener("focusout", (event) => {
+          if (heroCarousel.contains(event.relatedTarget)) return;
+          isFocusedWithin = false;
+          restartAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        heroCarousel.addEventListener("touchstart", () => {
+          isTouching = true;
+          stopAutoplayTimer();
+        }, autoplayTouchListenerOptions);
+
+        const finishTouchInteraction = (event) => {
+          isTouching = event.touches.length > 0;
+          if (!isTouching) restartAutoplayTimer();
+        };
+
+        heroCarousel.addEventListener("touchend", finishTouchInteraction, autoplayTouchListenerOptions);
+        heroCarousel.addEventListener("touchcancel", finishTouchInteraction, autoplayTouchListenerOptions);
+
+        installSwipeGesture(heroCarousel, (direction) => {
+          moveTo(activeIndex + direction);
+          restartAutoplayTimer();
+        }, { signal: autoplayEvents.signal });
+
+        pager?.addEventListener("keydown", (event) => {
+          const keyTargets = {
+            ArrowLeft: activeIndex - 1,
+            ArrowRight: activeIndex + 1,
+            Home: 0,
+            End: photos.length - 1,
+          };
+          if (!(event.key in keyTargets)) return;
+          event.preventDefault();
+          moveTo(keyTargets[event.key]);
+          restartAutoplayTimer();
+          dots[(keyTargets[event.key] + photos.length) % photos.length]?.focus();
+        }, autoplayListenerOptions);
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stopAutoplayTimer();
+          else restartAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        reducedMotion.addEventListener?.("change", (event) => {
+          if (event.matches) stopAutoplayTimer();
+          else restartAutoplayTimer();
+        }, autoplayListenerOptions);
+
+        updateState();
+        restartAutoplayTimer();
+      }
 
       const aboutCarousel = embedRoot.querySelector("[data-about-carousel]");
       if (aboutCarousel) {

@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260812-11">
-  <script src="script.js?v=20260812-5" defer></script>
+  <link rel="stylesheet" href="style.css?v=20260812-13">
+  <script src="script.js?v=20260812-8" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">
@@ -40,10 +40,29 @@
 
   <main id="main-content">
     <section class="hero" id="home" aria-labelledby="hero-title">
+      <div class="hero__photos" id="hero-photos" aria-hidden="true">
+        <img class="hero__photo is-active" src="assets/hero-photo.png" alt="" width="4093" height="1964" fetchpriority="high" decoding="async" data-hero-photo data-photo-label="Panel pembicara Semnastika">
+        <img class="hero__photo" src="assets/hero-photo-02-dsc02367.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Pembicara berdiskusi bersama peserta">
+        <img class="hero__photo" src="assets/hero-photo-03-dsc02203.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Pembicara memaparkan analisis data">
+        <img class="hero__photo" src="assets/hero-photo-04-dsc02261.jpg" alt="" width="4096" height="2305" loading="lazy" decoding="async" data-hero-photo data-photo-label="Sesi diskusi panel Semnastika">
+      </div>
       <div class="hero__shade"></div>
-      <div class="hero__content">
-        <h1 id="hero-title">Semnastika 18</h1>
-        <p>“Strategi Optimalisasi Investasi Menggunakan Pendekatan Matematika dan <em>Data Analytics</em>”</p>
+
+      <div class="hero__carousel" role="region" aria-roledescription="carousel" aria-label="Galeri foto Semnastika 18" data-hero-carousel>
+        <div class="hero__content">
+          <h1 id="hero-title">Semnastika 18</h1>
+          <p class="hero__theme">“Strategi Optimalisasi Investasi Menggunakan Pendekatan Matematika dan <em>Data Analytics</em>”</p>
+        </div>
+
+        <div class="hero__controls">
+          <div class="hero__pager" role="group" aria-label="Pilih foto Semnastika">
+            <button class="is-active" type="button" aria-label="Tampilkan foto panel pembicara" aria-controls="hero-photos" aria-current="true" data-hero-dot></button>
+            <button type="button" aria-label="Tampilkan foto pembicara bersama peserta" aria-controls="hero-photos" data-hero-dot></button>
+            <button type="button" aria-label="Tampilkan foto pemaparan analisis data" aria-controls="hero-photos" data-hero-dot></button>
+            <button type="button" aria-label="Tampilkan foto sesi diskusi panel" aria-controls="hero-photos" data-hero-dot></button>
+          </div>
+        </div>
+        <p class="sr-only" aria-live="polite" aria-atomic="true" data-hero-status>Foto 1 dari 4: Panel pembicara Semnastika</p>
       </div>
     </section>
 

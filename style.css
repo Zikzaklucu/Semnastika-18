@@ -37,6 +37,8 @@
   --type-instruction: clamp(14px, calc(0.2vw + 13px), 16px);
   --type-button-text: clamp(16px, calc(0.2vw + 16px), 19px);
   --type-display-button: clamp(27px, 3.2vw, 46px);
+  --type-timeline-label: clamp(26px, calc(1.2vw + 21px), 40px);
+  --type-timeline-date: clamp(16px, calc(0.45vw + 14px), 20px);
   --weight-body: 400;
   --weight-emphasis: 600;
   --weight-heading: 700;
@@ -313,8 +315,49 @@ button {
   min-height: 691px;
   display: grid;
   place-items: center;
+  overflow: hidden;
   isolation: isolate;
-  background: url("assets/hero-photo.png") center 45% / cover no-repeat;
+  background: var(--green-black);
+}
+
+.hero__photos,
+.hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__photos {
+  z-index: -2;
+  overflow: hidden;
+}
+
+.hero__photo {
+  object-fit: cover;
+  object-position: center 45%;
+  opacity: 0;
+  transform: scale(1.015);
+  transition:
+    opacity 180ms ease-in-out,
+    transform 180ms ease-in-out;
+}
+
+.hero__photo:nth-child(2) {
+  object-position: 62% center;
+}
+
+.hero__photo:nth-child(3) {
+  object-position: 62% center;
+}
+
+.hero__photo:nth-child(4) {
+  object-position: 58% center;
+}
+
+.hero__photo.is-active {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .hero__shade {
@@ -324,10 +367,17 @@ button {
   background: rgba(0, 0, 0, 0.69);
 }
 
+.hero__carousel {
+  width: min(100% - 32px, 1240px);
+  min-height: 430px;
+  display: grid;
+  place-items: center;
+  touch-action: pan-y;
+}
+
 .hero__content {
-  width: min(100% - 40px, 1100px);
+  width: min(100% - 64px, 1100px);
   text-align: center;
-  transform: translateY(-8px);
 }
 
 .hero h1,
@@ -354,13 +404,60 @@ button {
   letter-spacing: 0.05em;
 }
 
-.hero p {
+.hero__theme {
   width: min(92vw, 820px);
   margin: clamp(16px, 2vw, 28px) auto 0;
   font-size: clamp(15px, 1.35vw, 21px);
   font-weight: var(--weight-emphasis);
   line-height: 1.35;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.hero__controls {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-end: clamp(24px, 4vw, 48px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.hero__pager {
+  display: flex;
+  gap: 2px;
+}
+
+.hero__pager [data-hero-dot] {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.hero__pager [data-hero-dot]::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  background: var(--gold-light);
+  border: 2px solid var(--green-black);
+  transform: rotate(45deg);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.hero__pager [data-hero-dot].is-active::before {
+  background: var(--gold);
+  transform: rotate(45deg) scale(1.35);
+}
+
+.hero__pager [data-hero-dot]:focus-visible {
+  outline: 4px solid #fff05a;
+  outline-offset: -2px;
 }
 
 em {
@@ -902,7 +999,13 @@ em {
 }
 
 .linimasa-title {
+  position: relative;
+  inset-inline-start: 50%;
+  width: max-content;
+  max-width: 100%;
   margin: 0 0 64px;
+  text-align: center;
+  transform: translateX(-50%);
 }
 
 .linimasa-track {
@@ -980,16 +1083,16 @@ em {
   margin: 0 0 4px;
   color: var(--gold-light);
   font-family: "Rumble Brave", "Naluka", serif;
-  font-size: 1.4rem;
+  font-size: var(--type-timeline-label);
   font-weight: var(--weight-heading);
   line-height: 1.15;
 }
 
 .linimasa-date {
   margin: 0;
-  color: color-mix(in srgb, var(--gold-light) 75%, transparent);
+  color: var(--gold-light);
   font-family: "Montserrat", Arial, sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--type-timeline-date);
   line-height: 1.45;
 }
 
@@ -2610,6 +2713,20 @@ em {
   }
 }
 
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero {
+    min-height: 620px;
+  }
+
+  .hero__carousel {
+    min-height: 400px;
+  }
+
+  .hero h1 {
+    font-size: min(var(--type-page-title), 74px);
+  }
+}
+
 @media (max-width: 600px) {
   .display-title--two-line br {
     display: none;
@@ -2652,19 +2769,27 @@ em {
   }
 
   .hero {
-    min-height: 430px;
-    background-position: center;
+    min-height: 550px;
+  }
+
+  .hero__carousel {
+    width: min(100% - 20px, 520px);
+    min-height: 360px;
+  }
+
+  .hero__content {
+    width: 100%;
+  }
+
+  .hero__theme {
+    max-width: 330px;
+    margin-block-start: 18px;
+    line-height: 1.35;
   }
 
   .hero h1 {
     font-size: var(--type-page-title);
     line-height: 1.08;
-  }
-
-  .hero p {
-    max-width: 320px;
-    margin: 18px auto 0;
-    line-height: 1.35;
   }
 
   .section--about {

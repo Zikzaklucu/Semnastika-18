@@ -32,6 +32,9 @@
     const minimumDistance = options.minimumDistance ?? 56;
     const maximumDuration = options.maximumDuration ?? 650;
     const axisBias = options.axisBias ?? 1.25;
+    const listenerOptions = options.signal
+      ? { passive: true, signal: options.signal }
+      : { passive: true };
     let touchId = null;
     let startX = 0;
     let startY = 0;
@@ -60,7 +63,7 @@
       lastY = startY;
       startTime = performance.now();
       startContext = options.captureStart?.(event) ?? null;
-    }, { passive: true });
+    }, listenerOptions);
 
     surface.addEventListener("touchmove", (event) => {
       if (touchId === null) return;
@@ -68,7 +71,7 @@
       if (!touch) return;
       lastX = touch.clientX;
       lastY = touch.clientY;
-    }, { passive: true });
+    }, listenerOptions);
 
     surface.addEventListener("touchend", (event) => {
       if (touchId === null) return;
@@ -87,10 +90,153 @@
       if (Math.abs(deltaX) <= Math.abs(deltaY) * axisBias) return;
       if (options.shouldSwipe && !options.shouldSwipe({ deltaX, deltaY, duration, startContext: gestureContext })) return;
       onSwipe(deltaX < 0 ? 1 : -1);
-    }, { passive: true });
+    }, listenerOptions);
 
-    surface.addEventListener("touchcancel", reset, { passive: true });
+    surface.addEventListener("touchcancel", reset, listenerOptions);
   };
+
+  const HERO_AUTOPLAY_INTERVAL = 5000;
+  const heroCarousel = document.querySelector("[data-hero-carousel]");
+  if (heroCarousel) {
+    const hero = heroCarousel.closest(".hero");
+    const photos = Array.from(hero?.querySelectorAll("[data-hero-photo]") || []);
+    const dots = Array.from(heroCarousel.querySelectorAll("[data-hero-dot]"));
+    const pager = heroCarousel.querySelector(".hero__pager");
+    const status = heroCarousel.querySelector("[data-hero-status]");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let activeIndex = 0;
+    let autoplayTimer = 0;
+    let isHovering = false;
+    let isFocusedWithin = false;
+    let isTouching = false;
+
+    heroCarousel.__autoplayCleanup?.();
+    const autoplayEvents = new AbortController();
+    const autoplayListenerOptions = { signal: autoplayEvents.signal };
+    const autoplayTouchListenerOptions = { passive: true, signal: autoplayEvents.signal };
+
+    const stopAutoplayTimer = () => {
+      if (!autoplayTimer) return;
+      window.clearInterval(autoplayTimer);
+      autoplayTimer = 0;
+    };
+
+    const updateState = () => {
+      photos.forEach((photo, index) => {
+        photo.classList.toggle("is-active", index === activeIndex);
+      });
+      syncDotState(dots, activeIndex);
+
+      if (status && photos[activeIndex]) {
+        const label = photos[activeIndex].dataset.photoLabel || "Foto Semnastika";
+        status.textContent = `Foto ${activeIndex + 1} dari ${photos.length}: ${label}`;
+      }
+    };
+
+    const moveTo = (index) => {
+      if (photos.length < 2) return;
+      const nextIndex = (index + photos.length) % photos.length;
+      if (nextIndex === activeIndex) return;
+      activeIndex = nextIndex;
+      updateState();
+    };
+
+    const restartAutoplayTimer = () => {
+      stopAutoplayTimer();
+      if (
+        reducedMotion.matches
+        || document.hidden
+        || isHovering
+        || isFocusedWithin
+        || isTouching
+        || photos.length < 2
+      ) return;
+
+      autoplayTimer = window.setInterval(() => {
+        moveTo(activeIndex + 1);
+      }, HERO_AUTOPLAY_INTERVAL);
+    };
+
+    heroCarousel.__autoplayCleanup = () => {
+      stopAutoplayTimer();
+      autoplayEvents.abort();
+    };
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        moveTo(index);
+        restartAutoplayTimer();
+      }, autoplayListenerOptions);
+    });
+
+    heroCarousel.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "mouse") return;
+      isHovering = true;
+      stopAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    heroCarousel.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "mouse") return;
+      isHovering = false;
+      restartAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    heroCarousel.addEventListener("focusin", () => {
+      isFocusedWithin = true;
+      stopAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    heroCarousel.addEventListener("focusout", (event) => {
+      if (heroCarousel.contains(event.relatedTarget)) return;
+      isFocusedWithin = false;
+      restartAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    heroCarousel.addEventListener("touchstart", () => {
+      isTouching = true;
+      stopAutoplayTimer();
+    }, autoplayTouchListenerOptions);
+
+    const finishTouchInteraction = (event) => {
+      isTouching = event.touches.length > 0;
+      if (!isTouching) restartAutoplayTimer();
+    };
+
+    heroCarousel.addEventListener("touchend", finishTouchInteraction, autoplayTouchListenerOptions);
+    heroCarousel.addEventListener("touchcancel", finishTouchInteraction, autoplayTouchListenerOptions);
+
+    installSwipeGesture(heroCarousel, (direction) => {
+      moveTo(activeIndex + direction);
+      restartAutoplayTimer();
+    }, { signal: autoplayEvents.signal });
+
+    pager?.addEventListener("keydown", (event) => {
+      const keyTargets = {
+        ArrowLeft: activeIndex - 1,
+        ArrowRight: activeIndex + 1,
+        Home: 0,
+        End: photos.length - 1,
+      };
+      if (!(event.key in keyTargets)) return;
+      event.preventDefault();
+      moveTo(keyTargets[event.key]);
+      restartAutoplayTimer();
+      dots[(keyTargets[event.key] + photos.length) % photos.length]?.focus();
+    }, autoplayListenerOptions);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplayTimer();
+      else restartAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    reducedMotion.addEventListener?.("change", (event) => {
+      if (event.matches) stopAutoplayTimer();
+      else restartAutoplayTimer();
+    }, autoplayListenerOptions);
+
+    updateState();
+    restartAutoplayTimer();
+  }
 
   const aboutCarousel = document.querySelector("[data-about-carousel]");
   if (aboutCarousel) {
